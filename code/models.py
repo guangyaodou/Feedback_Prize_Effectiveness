@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+# define RNN model
 class RNN(nn.Module):
     def __init__(self, TEXT, embedding_size, hidden_size, num_classes, layers,
                  dropout, device, bidirectional=True, last_hidden=True):
@@ -12,7 +13,6 @@ class RNN(nn.Module):
         self.bidirectional = bidirectional
         self.vocab_size = len(TEXT.vocab)
 
-        # self.embedding = nn.Embedding(vocab_size, embedding_size)
         self.embedding = nn.Embedding.from_pretrained(TEXT.vocab.vectors)
         self.rnn = nn.RNN(input_size=embedding_size,
                           hidden_size=hidden_size,
@@ -27,29 +27,27 @@ class RNN(nn.Module):
         self.fc3 = nn.Linear(32, num_classes)
 
     def forward(self, text, text_len):
-        # dim(text) = batch_size * sentence_length
         x = self.embedding(text).to(self.device)
-        # dim(x) = batch_size * L * embedding_size
-
+        
         # packed sequence
-        packed_sequence = nn.utils.rnn.pack_padded_sequence(x, text_len.cpu(), batch_first=True)
+        packed_sequence = nn.utils.rnn.pack_padded_sequence(
+            x, text_len.cpu(), batch_first=True)
 
+        # RNN layer
         output, hidden = self.rnn(packed_sequence)
-        # dim(hn) = (D*num_layers) * batch_size * H out
+        
         padded_output, _ = torch.nn.utils.rnn.pad_packed_sequence(output)
-        # dim(padded_output) = L * batch_size * (D*H out)
 
+        # Get result based on condition (whether use last_hidden state or average, whether bidirection)
         if self.last_hidden:
             if self.bidirectional:
                 y = torch.cat((hidden[-2], hidden[-1]), dim=1)
             else:
-                y = hidden[-1]
-            # dim(y) = batch_size * D*(H out)
+                y = hidden[-1]    
         else:
-            # dim(padded_output) = L * batch_size * (D*H out)
-            # Avg pooling on padded_output's L's dimension
             y = torch.mean(padded_output, dim=0)
-            # dim(y) = batch_size * D*(H out)
+
+        #Fully connected layers    
         y = F.relu(self.fc1(y))
         y = F.dropout(y, p=0.2)
         y = F.relu(self.fc2(y))
@@ -58,6 +56,7 @@ class RNN(nn.Module):
         return y
 
 
+# define LSTM model
 class LSTM(nn.Module):
     def __init__(self, TEXT, embedding_size, hidden_size, num_classes, layers,
                  dropout, device, bidirectional=True, last_hidden=True):
@@ -67,7 +66,6 @@ class LSTM(nn.Module):
         self.bidirectional = bidirectional
         self.vocab_size = len(TEXT.vocab)
 
-        # self.embedding = nn.Embedding(vocab_size, embedding_size)
         self.embedding = nn.Embedding.from_pretrained(TEXT.vocab.vectors)
         self.lstm = nn.LSTM(input_size=embedding_size,
                             hidden_size=hidden_size,
@@ -82,29 +80,27 @@ class LSTM(nn.Module):
         self.fc3 = nn.Linear(32, num_classes)
 
     def forward(self, text, text_len):
-        # dim(text) = batch_size * sentence_length
         x = self.embedding(text).to(self.device)
-        # dim(x) = batch_size * L * embedding_size
 
         # packed sequence
-        packed_sequence = nn.utils.rnn.pack_padded_sequence(x, text_len.cpu(), batch_first=True)
+        packed_sequence = nn.utils.rnn.pack_padded_sequence(
+            x, text_len.cpu(), batch_first=True)
 
+        # LSTM layer
         output, (hidden, _) = self.lstm(packed_sequence)
-        # dim(hn) = (D*num_layers) * batch_size * H out
+        
         padded_output, _ = torch.nn.utils.rnn.pad_packed_sequence(output)
-        # dim(padded_output) = L * batch_size * (D*H out)
 
+        # Get result based on condition (whether use last_hidden state or average, whether bidirection)
         if self.last_hidden:
             if self.bidirectional:
                 y = torch.cat((hidden[-2], hidden[-1]), dim=1)
             else:
                 y = hidden[-1]
-            # dim(y) = batch_size * D*(H out)
         else:
-            # dim(padded_output) = L * batch_size * (D*H out)
-            # Avg pooling on padded_output's L's dimension
             y = torch.mean(padded_output, dim=0)
-            # dim(y) = batch_size * D*(H out)
+            
+        # Fully connected layers
         y = F.relu(self.fc1(y))
         y = F.dropout(y, p=0.2)
         y = F.relu(self.fc2(y))
@@ -113,6 +109,7 @@ class LSTM(nn.Module):
         return y
 
 
+# define GRU model
 class GRU(nn.Module):
     def __init__(self, TEXT, embedding_size, hidden_size, num_classes, layers,
                  dropout, device, bidirectional=True, last_hidden=True):
@@ -122,7 +119,6 @@ class GRU(nn.Module):
         self.bidirectional = bidirectional
         self.vocab_size = len(TEXT.vocab)
 
-        # self.embedding = nn.Embedding(vocab_size, embedding_size)
         self.embedding = nn.Embedding.from_pretrained(TEXT.vocab.vectors)
         self.gru = nn.GRU(input_size=embedding_size,
                           hidden_size=hidden_size,
@@ -139,29 +135,27 @@ class GRU(nn.Module):
         self.fc3 = nn.Linear(32, num_classes)
 
     def forward(self, text, text_len):
-        # dim(text) = batch_size * sentence_length
         x = self.embedding(text).to(self.device)
-        # dim(x) = batch_size * L * embedding_size
-
+        
         # packed sequence
-        packed_sequence = nn.utils.rnn.pack_padded_sequence(x, text_len.cpu(), batch_first=True)
+        packed_sequence = nn.utils.rnn.pack_padded_sequence(
+            x, text_len.cpu(), batch_first=True)
 
+        # GRU layer
         output, hidden = self.gru(packed_sequence)
-        # dim(hn) = (D*num_layers) * batch_size * H out
+       
         padded_output, _ = torch.nn.utils.rnn.pad_packed_sequence(output)
-        # dim(padded_output) = L * batch_size * (D*H out)
 
+        # Get result based on condition (whether use last_hidden state or average, whether bidirection)
         if self.last_hidden:
             if self.bidirectional:
                 y = torch.cat((hidden[-2], hidden[-1]), dim=1)
             else:
                 y = hidden[-1]
-            # dim(y) = batch_size * D*(H out)
         else:
-            # dim(padded_output) = L * batch_size * (D*H out)
-            # Avg pooling on padded_output's L's dimension
             y = torch.mean(padded_output, dim=0)
-            # dim(y) = batch_size * D*(H out)
+    
+        # Fully connected layers
         y = F.relu(self.bn1(self.fc1(y)))
         y = F.dropout(y, p=0.2)
         y = F.relu(self.bn2(self.fc2(y)))

@@ -19,7 +19,8 @@ def load_data(model_nm, split_ratio, data_information=False):
     df['inputs'] = df.discourse_type + sep + df.discourse_text
     df_test['inputs'] = df_test.discourse_type + sep + df_test.discourse_text
 
-    new_label = {"discourse_effectiveness": {"Ineffective": 0, "Adequate": 1, "Effective": 2}}
+    new_label = {"discourse_effectiveness": {
+        "Ineffective": 0, "Adequate": 1, "Effective": 2}}
     df = df.replace(new_label)
     df = df.rename(columns={"discourse_effectiveness": "label"})
 
@@ -30,16 +31,9 @@ def load_data(model_nm, split_ratio, data_information=False):
         return tokz(x["inputs"], truncation=True)
 
     inps = "discourse_text", "discourse_type"
-    # tok_ds = ds.map(tok_func, batched=True) Dataset({
-    #     features: ['discourse_id', 'essay_id', 'discourse_text', 'discourse_type', 'label', 'inputs', 'input_ids', 'token_type_ids', 'attention_mask'],
-    #     num_rows: 36765
-    # })
-    # tok_ds = ds.map(tok_func, batched=True, remove_columns=inps+('inputs','discourse_id','essay_id'))
-    tok_ds = ds.map(tok_func, batched=True, remove_columns=inps + ('inputs', 'discourse_id', 'essay_id'))
-    #  Dataset({
-    #     features: ['label', 'input_ids', 'token_type_ids', 'attention_mask'],
-    #     num_rows: 36765
-    # })
+
+    tok_ds = ds.map(tok_func, batched=True, remove_columns=inps +
+                    ('inputs', 'discourse_id', 'essay_id'))
 
     if data_information:
         print(ds.info)
@@ -52,7 +46,8 @@ def load_data(model_nm, split_ratio, data_information=False):
     val_sz = int(len(essay_ids) * val_prop)
     val_essay_ids = essay_ids[:val_sz]  # the essay ids of validation sets
 
-    is_val = np.isin(df.essay_id, val_essay_ids)  # checks whether the essay id belongs to the validation sets
+    # checks whether the essay id belongs to the validation sets
+    is_val = np.isin(df.essay_id, val_essay_ids)
     idxs = np.arange(len(df))
     val_idxs = idxs[is_val]
     trn_idxs = idxs[~is_val]

@@ -7,7 +7,7 @@ from torchtext.legacy import data
 
 
 def load_data(BATCH_SIZE=30,
-              split_ratio = 0.8,
+              split_ratio=0.8,
               vectors="glove.6B.100d",
               data_information=False,
               ):
@@ -30,8 +30,10 @@ def load_data(BATCH_SIZE=30,
         ['Adequate', 'Effective', 'Ineffective'], [1, 2, 0])
 
     sep = "[SEP]"
-    train_df['discourse_text'] = train_df["discourse_type"] + " " + sep + " " + train_df["discourse_text"]
-    test_df['discourse_text'] = test_df["discourse_type"] + " " + sep + " " + test_df["discourse_text"]
+    train_df['discourse_text'] = train_df["discourse_type"] + \
+        " " + sep + " " + train_df["discourse_text"]
+    test_df['discourse_text'] = test_df["discourse_type"] + \
+        " " + sep + " " + test_df["discourse_text"]
 
     train_df = train_df.drop(columns=["discourse_type"])
     train_df = train_df.rename(columns={"discourse_effectiveness": "label"})
@@ -53,23 +55,29 @@ def load_data(BATCH_SIZE=30,
     train = train_df.iloc[trn_idxs]
     valid = train_df.iloc[val_idxs]
 
-    train.to_csv(os.path.join(current_path + data_dir, "train_new.csv"), index=False)
-    valid.to_csv(os.path.join(current_path + data_dir, "valid_new.csv"), index=False)
-    test_df.to_csv(os.path.join(current_path + data_dir, "test_new.csv"), index=False)
+    train.to_csv(os.path.join(current_path + data_dir,
+                 "train_new.csv"), index=False)
+    valid.to_csv(os.path.join(current_path + data_dir,
+                 "valid_new.csv"), index=False)
+    test_df.to_csv(os.path.join(current_path + data_dir,
+                   "test_new.csv"), index=False)
 
     TEXT = data.Field(tokenize='spacy', batch_first=True, include_lengths=True)
     LABEL = data.LabelField(dtype=torch.float, batch_first=True)
-
 
     train_fields = [("discourse_id", None), ("essay_id", None), ('discourse_text', TEXT),
                     ('label', LABEL)]
     valid_fields = [("discourse_id", None), ("essay_id", None), ('discourse_text', TEXT),
                     ('label', LABEL)]
-    test_fields = [("discourse_id", None), ("essay_id", None), ('discourse_text', TEXT)]
+    test_fields = [("discourse_id", None), ("essay_id", None),
+                   ('discourse_text', TEXT)]
 
-    train_data = data.TabularDataset(path=os.path.join(current_path + data_dir, "train_new.csv"), format='csv', fields=train_fields, skip_header=True)
-    valid_data = data.TabularDataset(path=os.path.join(current_path + data_dir, "valid_new.csv"), format='csv', fields=valid_fields, skip_header=True)
-    test_data = data.TabularDataset(path=os.path.join(current_path + data_dir, "test_new.csv"), format='csv', fields=test_fields, skip_header=True)
+    train_data = data.TabularDataset(path=os.path.join(
+        current_path + data_dir, "train_new.csv"), format='csv', fields=train_fields, skip_header=True)
+    valid_data = data.TabularDataset(path=os.path.join(
+        current_path + data_dir, "valid_new.csv"), format='csv', fields=valid_fields, skip_header=True)
+    test_data = data.TabularDataset(path=os.path.join(
+        current_path + data_dir, "test_new.csv"), format='csv', fields=test_fields, skip_header=True)
 
     # In order to use BERT with torchtext, we have to set use_vocab=Fasle such that the torchtext knows we will not be building
     # our own vocabulary using our dataset from scratch. Instead, use pre-trained BERT tokenizer and its corresponding
@@ -88,7 +96,8 @@ def load_data(BATCH_SIZE=30,
         print("Size of LABEL vocabulary:", len(LABEL.vocab))
 
         # Commonly used words
-        print("Ten most commly used words are", TEXT.vocab.freqs.most_common(10))
+        print("Ten most commly used words are",
+              TEXT.vocab.freqs.most_common(10))
 
         # Word dictionary
         # print(TEXT.vocab.stoi)
@@ -114,21 +123,16 @@ def load_data(BATCH_SIZE=30,
     return train_iterator, valid_iterator, test_iterator, TEXT, LABEL
 
 
-if __name__ == "__main__":
-    data_information = True
-    train_iterator, valid_iterator, test_iterator, TEXT, LABEL = load_data(BATCH_SIZE=30, data_information=data_information)
-    print(type(train_iterator))
-    for batch in train_iterator:
-        print(batch.discourse_text)
-        print(batch.discourse_text[0].size())  # batch size * sentence length
-        print(batch.discourse_text[1].size())  # batch size
-        print("="*10)
-        print(batch.label)
-        print(batch.label.shape)
-        # if not bert, it's a tuple; if bert, batch.discourse_text.shape = batch size * MAX_SEQ_LENMAX_SEQ_LEN
-        # print(batch.discourse_text.shape)
-        # print("+" * 5)
-        # print(batch.discourse_effectiveness.shape)  # if bert, size is batch_size
-        # print(batch.discourse_effectiveness)
-        break
-    # print(TEXT.vocab.vectors.size())
+
+data_information = True
+train_iterator, valid_iterator, test_iterator, TEXT, LABEL = load_data(
+    BATCH_SIZE=30, data_information=data_information)
+print(type(train_iterator))
+for batch in train_iterator:
+    print(batch.discourse_text)
+    print(batch.discourse_text[0].size())  # batch size * sentence length
+    print(batch.discourse_text[1].size())  # batch size
+    print("="*10)
+    print(batch.label)
+    print(batch.label.shape)
+    # if not bert, it's a tuple; if bert, batch.discourse_text.shape = batch size * MAX_SEQ_LENMAX_SEQ_LEN

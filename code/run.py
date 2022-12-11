@@ -19,14 +19,16 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 settings_path = 'config.yml'
 settings = yaml.safe_load(open(settings_path, "r"))
 
-model_name = settings["general"]["model"].upper()  # ("RNN", "LSTM", "GRU", "BERT", "DEBERT")
+# ("RNN", "LSTM", "GRU", "BERT", "DEBERT")
+model_name = settings["general"]["model"].upper()
 
 if model_name == "BERT" or model_name == "DEBERT":
     print(f"Running model {model_name}")
-    model = AutoModelForSequenceClassification.from_pretrained(settings[model_name]["model_nm"], num_labels=NUM_CLASSES)
+    model = AutoModelForSequenceClassification.from_pretrained(
+        settings[model_name]["model_nm"], num_labels=NUM_CLASSES)
     train_dataset, valid_dataset, _ = bp.load_data(model_nm=settings[model_name]["model_nm"],
-                                                     split_ratio=settings[model_name]["split_ratio"],
-                                                     data_information=settings["general"]["data_information"])
+                                                   split_ratio=settings[model_name]["split_ratio"],
+                                                   data_information=settings["general"]["data_information"])
     tokenizer = AutoTokenizer.from_pretrained(settings[model_name]["model_nm"])
     trainer = train.bert_trainer(model=model,
                                  train_data=train_dataset,
@@ -35,11 +37,12 @@ if model_name == "BERT" or model_name == "DEBERT":
                                  epochs=settings[model_name]["EPOCH_NUM"],
                                  wd=settings[model_name]["weight_decay"],
                                  bs=settings[model_name]["BATCH_SIZE"],
-                                 lr=float(settings[model_name]["learning_rate"]),
+                                 lr=float(settings[model_name]
+                                          ["learning_rate"]),
                                  model_name=model_name)
     trainer.train()
 else:
-    train_iterator, valid_iterator, test_iterator, TEXT, LABEL= preprocess.load_data(
+    train_iterator, valid_iterator, test_iterator, TEXT, LABEL = preprocess.load_data(
         BATCH_SIZE=settings[model_name]["BATCH_SIZE"],
         split_ratio=settings[model_name]["split_ratio"],
         data_information=settings["general"]["data_information"])
@@ -88,7 +91,8 @@ else:
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=float(settings[model_name]["learning_rate"]),
                            weight_decay=float(settings[model_name]["weight_decay"]))
-    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10)
+    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(
+        optimizer, T_0=10)
     train_loss, train_accuracy, valid_loss, valid_accuracy, net = train.model_train(net=model,
                                                                                     train_iterator=train_iterator,
                                                                                     valid_iterator=valid_iterator,
@@ -99,5 +103,7 @@ else:
                                                                                     scheduler=None,
                                                                                     device=device)
 
-    train.plot_loss(train_loss=train_loss, valid_loss=valid_loss, model_name=model_name)
-    train.plot_accuracy(train_accuracy=train_accuracy, valid_accuracy=valid_accuracy, model_name=model_name)
+    train.plot_loss(train_loss=train_loss,
+                    valid_loss=valid_loss, model_name=model_name)
+    train.plot_accuracy(train_accuracy=train_accuracy,
+                        valid_accuracy=valid_accuracy, model_name=model_name)

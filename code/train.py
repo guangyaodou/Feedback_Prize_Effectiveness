@@ -12,6 +12,8 @@ def model_train(net, train_iterator, valid_iterator, epoch_num, criterion, optim
     valid_loss = []
     valid_accuracy = []
     net = net.to(device)
+
+    # Train by epoch
     for epoch in range(epoch_num):
         print("Running Epoch ", str(epoch + 1))
         net.train()
@@ -34,6 +36,8 @@ def model_train(net, train_iterator, valid_iterator, epoch_num, criterion, optim
             if scheduler is not None:
                 scheduler.step(epoch + i / len(train_iterator))
             train_l += l
+
+        # calculate Train accuracy/loss
         train_acc = train_acc / len(train_iterator)
         train_acc = train_acc.cpu().detach().numpy()
         train_accuracy.append(train_acc)
@@ -45,6 +49,7 @@ def model_train(net, train_iterator, valid_iterator, epoch_num, criterion, optim
             print(f"train loss after epoch {epoch + 1} is {train_l}")
             print(f"train accuracy after epoch {epoch + 1} is {train_acc}")
 
+        # calculate the validation loss
         net.eval()
         with torch.no_grad():
             for batch in valid_iterator:
@@ -85,11 +90,11 @@ def bert_trainer(model, train_data, valid_data, tokenizer, epochs, wd, bs, lr, m
     return Trainer(model, args, train_dataset=train_data, eval_dataset=valid_data,
                    tokenizer=tokenizer, compute_metrics=score)
 
-
+# loss funtion used to calculated loss
 def score(preds):
     return {'log loss': log_loss(preds.label_ids, F.softmax(torch.Tensor(preds.predictions)))}
 
-
+# function to calculate accuracy
 def calculate_accuracy(y_hat, y, device):
     y_hat = y_hat.to(device)
     y = y.to(device)
@@ -109,13 +114,22 @@ def get_score(outputs, labels):
 
 def inference(net, sentence, TEXT, LABEL, device):
     nlp = spacy.load('en_core_web_sm')
-    tokenized = [tok.text for tok in nlp.tokenizer(sentence)]  # tokenize the sentence
-    indexed = [TEXT.vocab.stoi[t] for t in tokenized]  # convert to integer sequence
-    length = [len(indexed)]  # compute no. of words
-    text = torch.LongTensor(indexed).to(device)  # convert to tensor
-    text = text.unsqueeze(1).T  # reshape in form of batch * no. of words
-    length_tensor = torch.LongTensor(length)  # convert to tensor
-    prediction = net(text, length_tensor)  # prediction
+    # tokenize the sentence
+    tokenized = [tok.text for tok in nlp.tokenizer(
+        sentence)]
+    # convert to integer sequence  
+    indexed = [TEXT.vocab.stoi[t]
+               for t in tokenized]
+    # compute no. of words  
+    length = [len(indexed)]  
+    # convert to tensor
+    text = torch.LongTensor(indexed).to(device)  
+    # reshape in form of batch * no. of words
+    text = text.unsqueeze(1).T  
+    # convert to tensor
+    length_tensor = torch.LongTensor(length)  
+    # get prediction result
+    prediction = net(text, length_tensor)  
     prediction = F.softmax(prediction, dim=1).argmax(1)
     for key in LABEL.vocab.stoi:
         if LABEL.vocab.stoi[key] == prediction.item():
@@ -133,7 +147,8 @@ def plot_loss(train_loss, valid_loss, model_name):
     legend = plt.legend(loc='lower right')
     ax.set_ylim(bottom=0)
     ax.set_xlim(left=0)
-    plt.savefig(f'../output/{model_name}_Training_Validation_Loss.png', bbox_inches='tight', dpi=2000)
+    plt.savefig(
+        f'../output/{model_name}_Training_Validation_Loss.png', bbox_inches='tight', dpi=2000)
     plt.show()
 
 
@@ -147,5 +162,6 @@ def plot_accuracy(train_accuracy, valid_accuracy, model_name):
     legend = plt.legend(loc='lower right')
     ax.set_ylim(bottom=0)
     ax.set_xlim(left=0)
-    plt.savefig(f'../output/{model_name}_Training_Validation_Accuracy.png', bbox_inches='tight', dpi=2000)
+    plt.savefig(
+        f'../output/{model_name}_Training_Validation_Accuracy.png', bbox_inches='tight', dpi=2000)
     plt.show()
