@@ -1,0 +1,6 @@
+/data
+.DS_Store
+.idea
+code/.vector_cache/
+code/__pycache__/
+/output

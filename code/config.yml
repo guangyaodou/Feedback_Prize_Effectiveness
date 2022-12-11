@@ -1,0 +1,56 @@
+general:
+  me: config.yml
+  data_information: False
+  model: RNN # (RNN, LSTM, GRU, BERT, DEBERT)
+
+RNN:
+  EPOCH_NUM: 50
+  BATCH_SIZE: 16
+  hidden_size: 16
+  number_of_layers: 2
+  bidirectional: True
+  dropout: 0.2
+  last_hidden: False
+  split_ratio: 0.8
+  weight_decay: 1e-4
+  learning_rate: 1e-3
+
+LSTM:
+  EPOCH_NUM: 100
+  BATCH_SIZE: 16
+  hidden_size: 16
+  number_of_layers: 2
+  bidirectional: True
+  dropout: 0.2
+  last_hidden: True
+  split_ratio: 0.8
+  weight_decay: 1e-4
+  learning_rate: 8e-4
+
+GRU:
+  EPOCH_NUM: 100
+  BATCH_SIZE: 16
+  hidden_size: 16
+  number_of_layers: 2
+  bidirectional: True
+  dropout: 0.2
+  last_hidden: False
+  split_ratio: 0.8
+  weight_decay: 1e-4
+  learning_rate: 8e-4
+
+BERT:
+  BATCH_SIZE: 16
+  model_nm: bert-base-uncased
+  split_ratio: 0.8
+  EPOCH_NUM: 1
+  weight_decay: 0.01
+  learning_rate: 8e-5
+
+DEBERT:
+  BATCH_SIZE: 16
+  model_nm: microsoft/deberta-v3-base
+  split_ratio: 0.8
+  EPOCH_NUM: 3
+  weight_decay: 0.01
+  learning_rate: 8e-5
