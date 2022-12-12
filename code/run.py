@@ -88,11 +88,14 @@ else:
     else:
         raise Exception("INVALID MODEL")
 
+    # Set criterion, optimizer, and scheduler
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=float(settings[model_name]["learning_rate"]),
                            weight_decay=float(settings[model_name]["weight_decay"]))
     scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(
         optimizer, T_0=10)
+    
+    # Train the model and get accuracy info
     train_loss, train_accuracy, valid_loss, valid_accuracy, net = train.model_train(net=model,
                                                                                     train_iterator=train_iterator,
                                                                                     valid_iterator=valid_iterator,
