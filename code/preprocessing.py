@@ -26,21 +26,25 @@ def load_data(BATCH_SIZE=30,
     train_df = pd.read_csv(train_data_path)
     test_df = pd.read_csv(test_data_path)
 
+    # Change String type Discourse type into int number
     train_df["discourse_effectiveness"] = train_df["discourse_effectiveness"].replace(
         ['Adequate', 'Effective', 'Ineffective'], [1, 2, 0])
 
+    # Use separater to concat the discourse type and discourse text
     sep = "[SEP]"
     train_df['discourse_text'] = train_df["discourse_type"] + \
                                  " " + sep + " " + train_df["discourse_text"]
     test_df['discourse_text'] = test_df["discourse_type"] + \
                                 " " + sep + " " + test_df["discourse_text"]
 
+    # drop discourse type and rename effectiveness as label
     train_df = train_df.drop(columns=["discourse_type"])
     train_df = train_df.rename(columns={"discourse_effectiveness": "label"})
 
     test_df = test_df.drop(columns=["discourse_type"])
     test_df = test_df.rename(columns={"discourse_effectiveness": "label"})
 
+    # reorganize by essay_id
     essay_ids = train_df.essay_id.unique()
     np.random.seed(42)
     np.random.shuffle(essay_ids)
@@ -55,6 +59,7 @@ def load_data(BATCH_SIZE=30,
     train = train_df.iloc[trn_idxs]
     valid = train_df.iloc[val_idxs]
 
+    # create new train, valid, and test data set
     train.to_csv(os.path.join(current_path + data_dir,
                               "train_new.csv"), index=False)
     valid.to_csv(os.path.join(current_path + data_dir,

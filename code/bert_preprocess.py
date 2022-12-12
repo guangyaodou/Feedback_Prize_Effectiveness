@@ -14,11 +14,13 @@ def load_data(model_nm, split_ratio, data_information=False):
     warnings.simplefilter('ignore')
     logging.disable(logging.WARNING)
 
+    # Use separater to concat the discourse type and discourse text
     tokz = AutoTokenizer.from_pretrained(model_nm)
     sep = tokz.sep_token
     df['inputs'] = df.discourse_type + sep + df.discourse_text
     df_test['inputs'] = df_test.discourse_type + sep + df_test.discourse_text
 
+    # Change String type Discourse type into int number
     new_label = {"discourse_effectiveness": {
         "Ineffective": 0, "Adequate": 1, "Effective": 2}}
     df = df.replace(new_label)
@@ -38,6 +40,7 @@ def load_data(model_nm, split_ratio, data_information=False):
     if data_information:
         print(ds.info)
 
+    # reorganize by essay_id
     essay_ids = df.essay_id.unique()
     np.random.seed(42)
     np.random.shuffle(essay_ids)
