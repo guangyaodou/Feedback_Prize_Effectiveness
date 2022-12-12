@@ -89,3 +89,6 @@ In this section, to get the classification result, we used many-to-one RNN model
 - Model pramater
 
 <img width="465" alt="image" src="https://user-images.githubusercontent.com/77183284/200183904-bda81a48-41c0-49ff-9185-fe0d3752819c.png">
+
+## Report
+Here is the link of the project [report](https://docs.google.com/document/d/1eNK_QezpReO-WvoyJmVDHdaUQdjPXsflrAp-O2gcidA/edit?usp=sharing)
