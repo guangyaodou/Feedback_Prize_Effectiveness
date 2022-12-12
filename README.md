@@ -61,6 +61,7 @@ python -m spacy download en_core_web_sm
 | [config.yml](code/config.yml)                   | Sets the hyperparameter for loading data, initializing models, and training.                            |
 | [train.py](code/train.py)                       | Defines functions that train the model, plot loss/accuracy for train/valid datasets, and make inference |
 | [run.py](code/run.py)                           | Trains the model, plot loss and accuracy                                                                |
+| [text_processing.py](code/text_processing.py)                           | Removes stopping words, and stems words                                     |
 
 ### Model's performance
 
