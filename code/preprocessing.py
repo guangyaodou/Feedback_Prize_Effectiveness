@@ -1,7 +1,7 @@
 import os
-from functools import partial
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 import torch
 from torchtext.legacy import data
 
@@ -31,9 +31,9 @@ def load_data(BATCH_SIZE=30,
 
     sep = "[SEP]"
     train_df['discourse_text'] = train_df["discourse_type"] + \
-        " " + sep + " " + train_df["discourse_text"]
+                                 " " + sep + " " + train_df["discourse_text"]
     test_df['discourse_text'] = test_df["discourse_type"] + \
-        " " + sep + " " + test_df["discourse_text"]
+                                " " + sep + " " + test_df["discourse_text"]
 
     train_df = train_df.drop(columns=["discourse_type"])
     train_df = train_df.rename(columns={"discourse_effectiveness": "label"})
@@ -56,11 +56,11 @@ def load_data(BATCH_SIZE=30,
     valid = train_df.iloc[val_idxs]
 
     train.to_csv(os.path.join(current_path + data_dir,
-                 "train_new.csv"), index=False)
+                              "train_new.csv"), index=False)
     valid.to_csv(os.path.join(current_path + data_dir,
-                 "valid_new.csv"), index=False)
+                              "valid_new.csv"), index=False)
     test_df.to_csv(os.path.join(current_path + data_dir,
-                   "test_new.csv"), index=False)
+                                "test_new.csv"), index=False)
 
     TEXT = data.Field(tokenize='spacy', batch_first=True, include_lengths=True)
     LABEL = data.LabelField(dtype=torch.float, batch_first=True)
@@ -121,18 +121,3 @@ def load_data(BATCH_SIZE=30,
         device=device)
 
     return train_iterator, valid_iterator, test_iterator, TEXT, LABEL
-
-
-
-data_information = True
-train_iterator, valid_iterator, test_iterator, TEXT, LABEL = load_data(
-    BATCH_SIZE=30, data_information=data_information)
-print(type(train_iterator))
-for batch in train_iterator:
-    print(batch.discourse_text)
-    print(batch.discourse_text[0].size())  # batch size * sentence length
-    print(batch.discourse_text[1].size())  # batch size
-    print("="*10)
-    print(batch.label)
-    print(batch.label.shape)
-    # if not bert, it's a tuple; if bert, batch.discourse_text.shape = batch size * MAX_SEQ_LENMAX_SEQ_LEN
